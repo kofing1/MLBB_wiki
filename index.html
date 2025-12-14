@@ -9,7 +9,7 @@
     margin: 0;
     padding: 20px;
     background: #f5f5f5;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+    font-family: system-ui;
   }
 
   h1 {
@@ -17,39 +17,41 @@
     margin-bottom: 20px;
   }
 
-  /* 瀑布流 */
   .masonry {
-    column-count: 6;
+    column-count: 5;
     column-gap: 16px;
   }
 
-  @media (max-width: 1400px) { .masonry { column-count: 5; } }
-  @media (max-width: 1100px) { .masonry { column-count: 4; } }
-  @media (max-width: 800px)  { .masonry { column-count: 3; } }
-  @media (max-width: 500px)  { .masonry { column-count: 2; } }
+  @media (max-width: 1400px) { .masonry { column-count: 4; } }
+  @media (max-width: 1000px) { .masonry { column-count: 3; } }
+  @media (max-width: 700px)  { .masonry { column-count: 2; } }
+  @media (max-width: 480px)  { .masonry { column-count: 1; } }
 
-  /* 单个卡片 */
   .item {
-    break-inside: avoid;
+    width: 100%;
     margin-bottom: 16px;
+    break-inside: avoid;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    overflow: hidden;
     text-align: center;
   }
 
-  /* 图片缩小 2 倍 */
   .item img {
-    width: 50%;
-    height: auto;
-    border-radius: 8px;
-    background: #ddd;
-    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    width: 512px;
+    height: 512px;
+    object-fit: contain;
+    max-width: 100%;
+    background: #eee;
   }
 
-  /* 文件名 */
-  .filename {
-    margin-top: 6px;
-    font-size: 12px;
+  .name {
+    padding: 8px;
+    font-size: 13px;
     color: #555;
     word-break: break-all;
+    border-top: 1px solid #eee;
   }
 </style>
 </head>
@@ -58,44 +60,34 @@
 
 <h1>Atlas Hero Head</h1>
 
-<div id="gallery" class="masonry"></div>
+<div class="masonry" id="gallery"></div>
 
 <script>
-  // ===== 改这里 =====
-  const GITHUB_USER = "你的GitHub用户名";
-  const REPO_NAME   = "MLBB_wiki";
-  const FOLDER_PATH = "atlas_hero_head";
-  // ==================
+fetch("images.json")
+  .then(res => res.json())
+  .then(list => {
+    const gallery = document.getElementById("gallery");
 
-  const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FOLDER_PATH}`;
-  const gallery = document.getElementById("gallery");
+    list.forEach(filename => {
+      const item = document.createElement("div");
+      item.className = "item";
 
-  fetch(apiUrl)
-    .then(res => res.json())
-    .then(files => {
-      files
-        .filter(f => f.type === "file")
-        .forEach(file => {
-          const item = document.createElement("div");
-          item.className = "item";
+      const img = document.createElement("img");
+      img.loading = "lazy";
+      img.src = `atlas_hero_head/${filename}`;
 
-          const img = document.createElement("img");
-          img.src = file.download_url;
-          img.loading = "lazy";
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = filename;
 
-          const name = document.createElement("div");
-          name.className = "filename";
-          name.textContent = file.name;
-
-          item.appendChild(img);
-          item.appendChild(name);
-          gallery.appendChild(item);
-        });
-    })
-    .catch(err => {
-      gallery.innerHTML = "图片加载失败（GitHub API）";
-      console.error(err);
+      item.appendChild(img);
+      item.appendChild(name);
+      gallery.appendChild(item);
     });
+  })
+  .catch(err => {
+    console.error("无法加载 images.json", err);
+  });
 </script>
 
 </body>
