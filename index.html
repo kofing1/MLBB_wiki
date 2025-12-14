@@ -17,23 +17,39 @@
     margin-bottom: 20px;
   }
 
+  /* 瀑布流 */
   .masonry {
-    column-count: 5;
+    column-count: 6;
     column-gap: 16px;
   }
 
-  @media (max-width: 1400px) { .masonry { column-count: 4; } }
-  @media (max-width: 1000px) { .masonry { column-count: 3; } }
-  @media (max-width: 700px)  { .masonry { column-count: 2; } }
-  @media (max-width: 480px)  { .masonry { column-count: 1; } }
+  @media (max-width: 1400px) { .masonry { column-count: 5; } }
+  @media (max-width: 1100px) { .masonry { column-count: 4; } }
+  @media (max-width: 800px)  { .masonry { column-count: 3; } }
+  @media (max-width: 500px)  { .masonry { column-count: 2; } }
 
-  .masonry img {
-    width: 100%;
-    margin-bottom: 16px;
-    border-radius: 8px;
+  /* 单个卡片 */
+  .item {
     break-inside: avoid;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  /* 图片缩小 2 倍 */
+  .item img {
+    width: 50%;
+    height: auto;
+    border-radius: 8px;
     background: #ddd;
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  }
+
+  /* 文件名 */
+  .filename {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #555;
+    word-break: break-all;
   }
 </style>
 </head>
@@ -41,32 +57,44 @@
 <body>
 
 <h1>Atlas Hero Head</h1>
-<div class="masonry" id="gallery"></div>
+
+<div id="gallery" class="masonry"></div>
 
 <script>
-  const owner = "kofing1";          // GitHub 用户名
-  const repo  = "MLBB_wiki";        // 仓库名
-  const path  = "atlas_hero_head";  // 图片目录
+  // ===== 改这里 =====
+  const GITHUB_USER = "你的GitHub用户名";
+  const REPO_NAME   = "MLBB_wiki";
+  const FOLDER_PATH = "atlas_hero_head";
+  // ==================
 
-  const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${FOLDER_PATH}`;
+  const gallery = document.getElementById("gallery");
 
-  fetch(api)
+  fetch(apiUrl)
     .then(res => res.json())
     .then(files => {
-      const gallery = document.getElementById("gallery");
-
       files
         .filter(f => f.type === "file")
-        .filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f.name))
         .forEach(file => {
+          const item = document.createElement("div");
+          item.className = "item";
+
           const img = document.createElement("img");
-          img.loading = "lazy";
           img.src = file.download_url;
-          gallery.appendChild(img);
+          img.loading = "lazy";
+
+          const name = document.createElement("div");
+          name.className = "filename";
+          name.textContent = file.name;
+
+          item.appendChild(img);
+          item.appendChild(name);
+          gallery.appendChild(item);
         });
     })
     .catch(err => {
-      console.error("加载图片失败", err);
+      gallery.innerHTML = "图片加载失败（GitHub API）";
+      console.error(err);
     });
 </script>
 
